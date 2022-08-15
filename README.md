@@ -12,7 +12,7 @@ A backend server for our project web-monitor-dashboard
 ## Set Up
 
 1. Clone 本仓库
-2. 配置数据库接口
+2. 配置数据库接口，创建 `instance/config.py` 并写入：
     ```python
     MONGODB_SETTINGS = {
         'db': 'MongoDBAtlas',
