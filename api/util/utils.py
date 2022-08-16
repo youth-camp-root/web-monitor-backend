@@ -8,7 +8,7 @@ Copyright © 2022 team Root of ByteDance Youth Camp. All rights reserved.
 """
 
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import jsonify
 
 
@@ -39,3 +39,13 @@ def failResponseWrap(msg, data=None, code=50000):
         'msg': msg,
         'code': code,
     })
+
+
+def get_past_days(days):
+    date_list = []
+    for i in range(days, 0, -1):
+        day = datetime.now() - timedelta(days=i)
+        the_date = datetime(day.year, day.month, day.day).strftime('%Y-%m-%d')
+        date_list.append(the_date)
+        
+    return date_list

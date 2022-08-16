@@ -9,6 +9,7 @@ from api.util.utils import failResponseWrap, successResponseWrap
 from api.model.models import *
 from api.route.user import api as user_api
 from api.route.mock_api import api as mock_api
+from ..util.data_process import get_errors_overview, get_error_detail_overview
 
 api = Blueprint('api', __name__, url_prefix='/api')
 api.register_blueprint(user_api)
@@ -37,3 +38,53 @@ def get_errors():
         return failResponseWrap(msg='User not found')
     else:
         return successResponseWrap([error.to_dict(withUserInfo=True) for error in errors])
+
+
+@api.route('/error/issue', methods=['GET'])
+def getErrorInfo():
+    error_id = request.args.get('id')
+
+    if not error_id:
+        return failResponseWrap(msg='Error ID needed')
+    
+    try:
+        errorIssue = ErrorData.objects(_id=ObjectId(error_id)).first()
+
+        if not errorIssue:
+            return failResponseWrap(msg='Error not found')
+
+        error_details = get_error_detail_overview(errorIssue['errorType'], errorIssue['originURL'])
+
+        error_info = errorIssue.to_dict(withUserInfo=True)
+
+        error_info.update(error_details)
+
+        return successResponseWrap(error_info)
+
+    except Exception as e:
+        print(e)
+        return failResponseWrap(msg='Internal Error')
+
+
+# ----------------------------------------- Statistics -------------------------------------
+
+@api.route('/error/issues/error-overview', methods=['GET'])
+def error_overview():
+    data = get_errors_overview()
+    return successResponseWrap(data)
+
+
+@api.route('/error/issues/list', methods=['GET'])
+def error_list():
+
+    error_issue_list = []
+
+    errors = ErrorData.objects
+
+    for error in errors:
+        error_details = get_error_detail_overview(error['errorType'], error['originURL'])
+        error_info = error.to_dict(withUserInfo=False)
+        error_info.update(error_details)
+        error_issue_list.append(error_info)
+
+    return successResponseWrap(error_issue_list)
