@@ -9,9 +9,9 @@ Copyright © 2022 team Root of ByteDance Youth Camp. All rights reserved.
 
 from flask import Blueprint
 import click
-from ..api.model.models import User, RequestData, ErrorData
-from .data_generator import UserMaterial, RequestMaterial, ErrorMaterial
-from ..util.data_process import merge_failed_request
+from api.model.models import User, RequestData, ErrorData
+from api.mock.data_generator import UserMaterial, RequestMaterial, ErrorMaterial
+from api.util.data_process import merge_failed_request
 
 cmd = Blueprint('cmd', __name__)
 

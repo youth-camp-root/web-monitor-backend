@@ -9,6 +9,7 @@ Copyright © 2022 team Root of ByteDance Youth Camp. All rights reserved.
 
 import time
 from datetime import datetime
+from flask import jsonify
 
 
 def convert_utc_to_local(utc_datetime):
@@ -21,3 +22,20 @@ def convert_utc_to_local(utc_datetime):
         return local_time.strftime('%Y-%m-%d %H:%M:%S')
     else:
         return None
+
+def successResponseWrap(data):
+    return jsonify({
+        'data': data,
+        'status': 'ok',
+        'msg': '请求成功',
+        'code': 20000,
+    });
+
+
+def failResponseWrap(data, msg, code = 50000):
+    return jsonify({
+        'data': data,
+        'status': 'fail',
+        'msg': msg,
+        'code': code,
+    });
