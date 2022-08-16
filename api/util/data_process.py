@@ -7,7 +7,7 @@ Contributed by: Xiong Kaijie
 Copyright © 2022 team Root of ByteDance Youth Camp. All rights reserved.
 """
 
-from ..api.model.models import User, RequestData, ErrorData
+from ..model.models import User, RequestData, ErrorData
 
 
 def merge_failed_request(origin_url):
