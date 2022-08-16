@@ -29,7 +29,7 @@ def successResponseWrap(data):
         'status': 'ok',
         'msg': '请求成功',
         'code': 20000,
-    });
+    })
 
 
 def failResponseWrap(data, msg, code = 50000):
@@ -38,4 +38,4 @@ def failResponseWrap(data, msg, code = 50000):
         'status': 'fail',
         'msg': msg,
         'code': code,
-    });
+    })
