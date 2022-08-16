@@ -32,7 +32,7 @@ def successResponseWrap(data):
     })
 
 
-def failResponseWrap(data, msg, code = 50000):
+def failResponseWrap(msg, data=None, code=50000):
     return jsonify({
         'data': data,
         'status': 'fail',
