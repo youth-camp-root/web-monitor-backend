@@ -2,21 +2,20 @@ from flask import Flask
 from flasgger import Swagger
 from flask_cors import CORS
 from api.route.api import api
-from api.model.models import db
+from flask_mongoengine import MongoEngine
 
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
 
+    app.config.from_pyfile('config.py')
     app.config['SWAGGER'] = {
         'title': 'Flask API Starter Kit',
     }
+
     Swagger(app)
-
     CORS(app, resources={r'/api/*': {'origins': '*'}})
-
-    app.config.from_pyfile('config.py')
-    db.init_app(app)
+    MongoEngine().init_app(app)
 
     app.register_blueprint(api)
 
