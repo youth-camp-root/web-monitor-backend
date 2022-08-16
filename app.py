@@ -2,6 +2,7 @@ from flask import Flask
 from flasgger import Swagger
 from flask_cors import CORS
 from api.route.api import api
+from api.mock.mock_data_forger import cmd
 from flask_mongoengine import MongoEngine
 
 
@@ -18,6 +19,7 @@ def create_app():
     MongoEngine().init_app(app)
 
     app.register_blueprint(api)
+    app.register_blueprint(cmd)
 
     return app
 
