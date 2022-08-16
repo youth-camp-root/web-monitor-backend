@@ -9,11 +9,13 @@ from api.util.utils import failResponseWrap, successResponseWrap
 from api.model.models import *
 from api.route.user import api as user_api
 from api.route.mock_api import api as mock_api
+from api.route.performance import api as performance_api
 from ..util.data_process import get_errors_overview, get_error_detail_overview
 
 api = Blueprint('api', __name__, url_prefix='/api')
 api.register_blueprint(user_api)
 api.register_blueprint(mock_api)
+api.register_blueprint(performance_api)
 
 
 @api.route('/request', methods=['GET'])
