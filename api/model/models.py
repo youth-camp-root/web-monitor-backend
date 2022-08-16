@@ -198,7 +198,7 @@ class ErrorData(DynamicDocument):
                 'selector': self.selector
             }
             if withUserInfo:
-                result['user'] = self.user.to_dict()
+                result['user'] = self.user
         elif self.category == 'Resource':
             result = {
                 'errorID': json.loads(json_util.dumps(self.id)),
@@ -212,7 +212,7 @@ class ErrorData(DynamicDocument):
                 'selector': self.selector
             }
             if withUserInfo:
-                result['user'] = self.user.to_dict()
+                result['user'] = self.user
         elif self.category == 'Request':
             result = {
                 'errorID': json.loads(json_util.dumps(self.id)),
@@ -222,8 +222,6 @@ class ErrorData(DynamicDocument):
                 'errorType': self.errorType,
                 'requestData': self.requestData.to_dict()
             }
-            # if withUserInfo:
-            #     result['user'] = self.user.to_dict()
         elif self.category == 'BlankScreen':
             result = {
                 'errorID': json.loads(json_util.dumps(self.id)),
@@ -237,5 +235,5 @@ class ErrorData(DynamicDocument):
                 'selector': self.selector
             }
             if withUserInfo:
-                result['user'] = self.user.to_dict()
+                result['user'] = self.user
         return result
