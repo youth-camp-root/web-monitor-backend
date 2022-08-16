@@ -36,4 +36,4 @@ def get_user_info(userID):
         return successResponseWrap({'user': user, 'events': user_events, 'errors': user_errors})
 
     except Exception as e:
-        return failResponseWrap(message='Internal Error')
+        return failResponseWrap(msg='Internal Error')
