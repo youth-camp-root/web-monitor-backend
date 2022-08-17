@@ -10,8 +10,6 @@ Copyright © 2022 team Root of ByteDance Youth Camp. All rights reserved.
 from flask_mongoengine import MongoEngine
 from mongoengine import *
 from datetime import datetime
-import bson.json_util as json_util
-import json
 
 
 
@@ -182,58 +180,3 @@ class ErrorData(DynamicDocument):
         'ordering': ['-timestamp'],
         'allow_inheritance': True,
     }
-
-    def to_dict(self, withUserInfo):
-        if self.category == 'JS' or self.category == 'Promise':
-            result = {
-                'errorID': json.loads(json_util.dumps(self.id)),
-                'category': self.category,
-                'originURL': self.originURL,
-                'timestamp': self.timestamp,
-                'errorType': self.errorType,
-                'errorMsg': self.errorMsg,
-                'filename': self.filename,
-                'position': self.position,
-                'stack': self.stack,
-                'selector': self.selector
-            }
-            if withUserInfo:
-                result['user'] = self.user
-        elif self.category == 'Resource':
-            result = {
-                'errorID': json.loads(json_util.dumps(self.id)),
-                'category': self.category,
-                'originURL': self.originURL,
-                'timestamp': self.timestamp,
-                'errorType': self.errorType,
-                'filename': self.filename,
-                'tagName': self.tagName,
-                'rsrcTimestamp': self.rsrcTimestamp,
-                'selector': self.selector
-            }
-            if withUserInfo:
-                result['user'] = self.user
-        elif self.category == 'Request':
-            result = {
-                'errorID': json.loads(json_util.dumps(self.id)),
-                'category': self.category,
-                'originURL': self.originURL,
-                'timestamp': self.timestamp,
-                'errorType': self.errorType,
-                'requestData': self.requestData.to_dict()
-            }
-        elif self.category == 'BlankScreen':
-            result = {
-                'errorID': json.loads(json_util.dumps(self.id)),
-                'category': self.category,
-                'originURL': self.originURL,
-                'timestamp': self.timestamp,
-                'errorType': self.errorType,
-                'emptyPoints': self.emptyPoints,
-                'screen': self.screen,
-                'viewPoint': self.viewPoint,
-                'selector': self.selector
-            }
-            if withUserInfo:
-                result['user'] = self.user
-        return result

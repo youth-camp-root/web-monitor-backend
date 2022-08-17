@@ -12,7 +12,10 @@ from .utils import get_past_days
 
 
 def merge_failed_request(origin_url):
-    errorReqs = RequestData.objects(is_error=True)
+    req_pipeline = [
+        {'$match': { 'is_error': True }},
+    ]
+    errorReqs = RequestData.objects().aggregate(req_pipeline)
 
     if errorReqs:
         for errorReq in errorReqs:
