@@ -28,6 +28,11 @@ A backend server for our project web-monitor-dashboard
     export FLASK_DEBUG=true
     flask run
     ```
+    win
+    ```bash
+    set FLASK_DEBUG=true
+    flask run
+    ```
 5. 访问 http://localhost:port/apidocs 查看 swagger 文档
 
 ```
