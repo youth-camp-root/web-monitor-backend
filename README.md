@@ -16,7 +16,7 @@ A backend server for our project web-monitor-dashboard
     ```python
     MONGODB_SETTINGS = {
         'db': 'MongoDBAtlas',
-        'host': "mongodb://......"
+        'host': "mongodb://youthcamp:root@xiaotianxt.com:27017/?authMechanism=DEFAULT"
     }
     ```
 3. 安装依赖
@@ -26,6 +26,11 @@ A backend server for our project web-monitor-dashboard
 4. 启动服务端
     ```bash
     export FLASK_DEBUG=true
+    flask run
+    ```
+    win
+    ```bash
+    set FLASK_DEBUG=true
     flask run
     ```
 5. 访问 http://localhost:port/apidocs 查看 swagger 文档
