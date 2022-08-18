@@ -68,7 +68,7 @@ class RequestMaterial():
 
     targetURL = [fake.uri() for _ in range(20)]
     statusCode = ['404', '401', '502', '200', '201', '202', '307']
-    timestamp = [fake.date_between_dates(date_start=datetime(2022,7,15), date_end=datetime.now) for _ in range(30)]
+    timestamp = [fake.date_between_dates(date_start=datetime(2022,7,15), date_end=datetime(2022,8,18)) for _ in range(30)]
     eventType = ['load']
     httpDuration = [str(random.randint(1, 20)) for _ in range(10)]
     dnsDuration = [str(random.randint(1, 20)) for _ in range(10)]
@@ -124,7 +124,7 @@ class ErrorMaterial():
 
     category = ['JS', 'Promise', 'Resource', 'BlankScreen']
     originURL = [fake.uri() for _ in range(20)]
-    timestamp = [fake.date_between_dates(date_start=datetime(2022,7,15), date_end=datetime.now) for _ in range(30)]
+    timestamp = [fake.date_between_dates(date_start=datetime(2022,7,15), date_end=datetime(2022,8,18)) for _ in range(30)]
     errorMsg = {
         'jsErrorMsg': [
             'Uncaught SyntaxError: Invalid or unexpected token',
