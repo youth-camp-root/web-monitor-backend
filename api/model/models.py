@@ -39,6 +39,21 @@ class User(DynamicDocument):
     }
 
 
+class PageLoad(DynamicDocument):
+    user = ReferenceField(User)
+    pageUrl = StringField(required=True)
+    timestamp = DateTimeField(required=True)
+    FP = FloatField(required=True)
+    FCP = FloatField(required=True)
+    DOMReady = FloatField(required=True)
+    stayDuration = FloatField(required=True)
+
+    meta = {
+        'collection': 'pageLoad',
+        'ordering': ['-id']
+    }
+
+
 class RequestData(DynamicDocument):
     """请求数据结构
 
@@ -59,8 +74,8 @@ class RequestData(DynamicDocument):
     statusCode = StringField(required=True)
     timestamp = DateTimeField(required=True)
     eventType = StringField()
-    httpDuration = StringField()
-    dnsDuration = StringField()
+    httpDuration = FloatField()
+    dnsDuration = FloatField()
     params = StringField()
     responseData = StringField()
     is_error = BooleanField(required=True, default=False)
