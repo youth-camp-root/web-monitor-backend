@@ -31,7 +31,7 @@ class UserMaterial():
             'os': ['macOS Monterey', 'macOS Big Sur', 'macOS Mojave']
         },
         {
-            'device': ['PC', 'Surface',],
+            'device': ['PC', 'Surface', ],
             'os': ['Windows 10', 'Windows 11']
         },
         {
@@ -54,7 +54,8 @@ class UserMaterial():
         for ip in user_ips:
             user_info = {}
             device_type = random.randint(0, 3)
-            user_info['device'] = random.choice(self.device_os[device_type]['device'])
+            user_info['device'] = random.choice(
+                self.device_os[device_type]['device'])
             user_info['os'] = random.choice(self.device_os[device_type]['os'])
             user_info['browser'] = random.choice(self.browser)
             user_info['ip'] = ip
@@ -64,11 +65,27 @@ class UserMaterial():
         return user_list
 
 
+class PageLoadMaterial():
+    def generate(self, users, num=10):
+        return [
+            {
+                'user': random.choice(users),
+                'pageUrl': fake.url(),
+                'timestamp': fake.date_between_dates(date_start=datetime(2022, 7, 15), date_end=datetime(2022, 8, 18)),
+                'FP': random.uniform(10, 1024),
+                'FCP': random.uniform(10, 1024),
+                'DOMReady': random.uniform(10, 1024),
+                'stayDuration': random.uniform(10, 1024),
+            } for _ in range(num)
+        ]
+
+
 class RequestMaterial():
 
     targetURL = [fake.uri() for _ in range(20)]
     statusCode = ['404', '401', '502', '200', '201', '202', '307']
-    timestamp = [fake.date_between_dates(date_start=datetime(2022,7,15), date_end=datetime(2022,8,18)) for _ in range(30)]
+    timestamp = [fake.date_between_dates(date_start=datetime(
+        2022, 7, 15), date_end=datetime(2022, 8, 18)) for _ in range(30)]
     eventType = ['load']
     httpDuration = [str(random.randint(1, 20)) for _ in range(10)]
     dnsDuration = [str(random.randint(1, 20)) for _ in range(10)]
@@ -95,7 +112,7 @@ class RequestMaterial():
         else:
             request_info['is_error'] = False
             request_info['responseData'] = self.responseData['success']
-        
+
         return request_info
 
     def generate_request_data(self, users):
@@ -119,12 +136,12 @@ class RequestMaterial():
         return request_list
 
 
-
 class ErrorMaterial():
 
     category = ['JS', 'Promise', 'Resource', 'BlankScreen']
     originURL = [fake.uri() for _ in range(20)]
-    timestamp = [fake.date_between_dates(date_start=datetime(2022,7,15), date_end=datetime(2022,8,18)) for _ in range(30)]
+    timestamp = [fake.date_between_dates(date_start=datetime(
+        2022, 7, 15), date_end=datetime(2022, 8, 18)) for _ in range(30)]
     errorMsg = {
         'jsErrorMsg': [
             'Uncaught SyntaxError: Invalid or unexpected token',
@@ -171,7 +188,8 @@ class ErrorMaterial():
 
         elif error_info['category'] == 'Promise':
             error_info['errorType'] = 'promiseError'
-            error_info['errorMsg'] = random.choice(self.errorMsg['promiseErrorMsg'])
+            error_info['errorMsg'] = random.choice(
+                self.errorMsg['promiseErrorMsg'])
             error_info['filename'] = random.choice(self.filename)
             error_info['position'] = self.position
             error_info['stack'] = self.stack
@@ -190,7 +208,7 @@ class ErrorMaterial():
             error_info['screen'] = self.screen
             error_info['viewPoint'] = self.viewPoint
             error_info['selector'] = self.selector
-        
+
         return error_info
 
     def generate_error_data(self, users):
@@ -210,6 +228,5 @@ class ErrorMaterial():
             for _ in range(100):
                 user = {}
                 error_list.append(self.build_basic_error(user))
-                
-        return error_list
 
+        return error_list

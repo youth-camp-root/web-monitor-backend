@@ -11,8 +11,8 @@ from flask import Blueprint
 import click
 import sys
 
-from api.model.models import User, RequestData, ErrorData
-from api.mock.data_generator import UserMaterial, RequestMaterial, ErrorMaterial
+from api.model.models import PageLoad, User, RequestData, ErrorData
+from api.mock.data_generator import PageLoadMaterial, UserMaterial, RequestMaterial, ErrorMaterial
 from api.util.data_process import merge_failed_request
 
 cmd = Blueprint('cmd', __name__)
@@ -56,6 +56,20 @@ def user_forger(amount):
         return True
 
     except ValueError:
+        return False
+
+
+def pageLoad_forger(amount):
+    """同上，懒得写了"""
+    try:
+        users = User.objects()
+        data = PageLoadMaterial().generate(users, num=len(users)*(amount if amount else 10))
+        items = [PageLoad(**item) for item in data]
+        PageLoad.objects.insert(items)
+        return True
+
+    except ValueError as e:
+        print(e)
         return False
 
 
@@ -113,7 +127,8 @@ def error_forger(amount):
         error_requests_amount = RequestData.objects(is_error=True).count()
 
         if not amount:
-            default_error_amount = int(current_user_amount*0.7) - error_requests_amount
+            default_error_amount = int(
+                current_user_amount*0.7) - error_requests_amount
             pipeline = [
                 {'$sample': {'size': default_error_amount}}
             ]
@@ -132,7 +147,7 @@ def error_forger(amount):
         for err in errs:
             new_err = ErrorData(**err)
             new_err.save()
-        
+
         merge_failed_request(None)
 
         return True
@@ -149,6 +164,16 @@ def forgeuser(amount):
         click.echo('Users data added')
     else:
         click.echo('Add users data failed')
+
+
+@cmd.cli.command()
+@click.argument('amount', required=False)
+def forgepageLoad(amount):
+    """default amount is len(users) * 10"""
+    if pageLoad_forger(amount):
+        click.echo('PageLoad data added')
+    else:
+        click.echo('Add PageLoad data failed')
 
 
 @cmd.cli.command()
