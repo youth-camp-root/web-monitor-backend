@@ -97,7 +97,7 @@ class RequestMaterial():
 
     def build_basic_request(self, user):
         request_info = {}
-        request_info['user'] = user
+        request_info['user'] = user['_id']
         request_info['targetURL'] = random.choice(self.targetURL)
         request_info['statusCode'] = random.choice(self.statusCode)
         request_info['timestamp'] = random.choice(self.timestamp)
@@ -173,7 +173,7 @@ class ErrorMaterial():
 
     def build_basic_error(self, user):
         error_info = {}
-        error_info['user'] = user
+        error_info['user'] = user['_id']
         error_info['category'] = random.choice(self.category)
         error_info['originURL'] = random.choice(self.originURL)
         error_info['timestamp'] = random.choice(self.timestamp)
