@@ -37,9 +37,9 @@ def get_errors():
         errors = ErrorData.objects
 
     if not errors:
-        return failResponseWrap(msg='User not found')
+        return failResponseWrap(msg='Error not found')
     else:
-        return successResponseWrap([error.to_dict(withUserInfo=True) for error in errors])
+        return successResponseWrap(errors)
 
 
 @api.route('/error/issue', methods=['GET'])
@@ -57,7 +57,7 @@ def getErrorInfo():
 
         error_details = get_error_detail_overview(errorIssue['errorType'], errorIssue['originURL'])
 
-        error_info = errorIssue.to_dict(withUserInfo=True)
+        error_info = errorIssue
 
         error_info.update(error_details)
 
@@ -85,7 +85,7 @@ def error_list():
 
     for error in errors:
         error_details = get_error_detail_overview(error['errorType'], error['originURL'])
-        error_info = error.to_dict(withUserInfo=False)
+        error_info = error
         error_info.update(error_details)
         error_issue_list.append(error_info)
 

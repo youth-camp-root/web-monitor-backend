@@ -1,6 +1,6 @@
 """
 mock_data_forger.py
-- forge mocked data into database
+- forge mocked data into database using command line tools
 
 Created by Xiong Kaijie on 2022-08-01.
 Contributed by: Xiong Kaijie
@@ -15,43 +15,134 @@ from api.util.data_process import merge_failed_request
 
 cmd = Blueprint('cmd', __name__)
 
+
+def user_forger(amount):
+    """forge mock user data with specific amount
+
+    Args:
+        amount (Integer, default: 50 | Optional): the amount of user data to be generated
+
+    Returns:
+        bool: if forged successfully or not
+    """
+    try:
+        if amount:
+            users = UserMaterial().generate_user_data(int(amount))
+        else:
+            users = UserMaterial().generate_user_data()
+        for user in users:
+            new_user = User(**user)
+            new_user.save()
+        return True
+
+    except ValueError:
+        return False
+
+
+def request_forger(amount):
+    """forge mock request data with specific amount
+
+    Args:
+        amount (Integer | Optional): the amount of request data to be generated
+        default: 30% of the amount of the current users
+
+    Returns:
+        bool: if forged successfully or not
+    """
+    try:
+        current_user_amount = User.objects.count()
+
+        if not amount:
+            default_request_amount = int(current_user_amount*0.3)
+            pipeline = [
+                {'$sample': {'size': default_request_amount}}
+            ]
+            users = User.objects().aggregate(pipeline)
+
+        elif int(amount) <= current_user_amount:
+            pipeline = [
+                {'$sample': {'size': int(amount)}}
+            ]
+            users = User.objects().aggregate(pipeline)
+
+        else:
+            return False
+
+        reqs = RequestMaterial().generate_request_data(users)
+        for req in reqs:
+            new_req = RequestData(**req)
+            new_req.save()
+        return True
+
+    except ValueError:
+        return False
+
+
+def error_forger(amount):
+    """forge mock error data with specific amount
+
+    Args:
+        amount (Integer | Optional): the amount of error data to be generated
+        default: 70% of the amount of the current users
+
+    Returns:
+        bool: if forged successfully or not
+    """
+    try:
+        current_user_amount = User.objects.count()
+        error_requests_amount = RequestData.objects(is_error=True).count()
+
+        if not amount:
+            default_error_amount = int(current_user_amount*0.7) - error_requests_amount
+            pipeline = [
+                {'$sample': {'size': default_error_amount}}
+            ]
+            users = User.objects().aggregate(pipeline)
+
+        elif int(amount) <= current_user_amount:
+            pipeline = [
+                {'$sample': {'size': int(amount)-error_requests_amount}}
+            ]
+            users = User.objects().aggregate(pipeline)
+
+        else:
+            return False
+
+        errs = ErrorMaterial().generate_error_data(users)
+        for err in errs:
+            new_err = ErrorData(**err)
+            new_err.save()
+        
+        merge_failed_request(None)
+
+        return True
+
+    except ValueError:
+        return False
+
+
 @cmd.cli.command()
-def forgeuser():
-    users = UserMaterial().generate_user_data()
-
-    for user in users:
-        new_user = User(**user)
-        new_user.save()
-    
-    click.echo('Users data added')
+@click.argument('amount', required=False)
+def forgeuser(amount):
+    if user_forger(amount):
+        click.echo('Users data added')
+    else:
+        click.echo('Add users data failed')
 
 
 @cmd.cli.command()
-def forgerequest():
-    users = User.objects[:5]
-
-    reqs = RequestMaterial().generate_request_data(users)
-
-    for req in reqs:
-        new_req = RequestData(**req)
-        new_req.save()
-    
-    click.echo('Request data added')
+@click.argument('amount', required=False)
+def forgerequest(amount):
+    if request_forger(amount):
+        click.echo('Request data added')
+    else:
+        click.echo('Add request data failed')
 
 
 @cmd.cli.command()
-def forgeerror():
-    users_a = User.objects[:20]
-    users_b = User.objects[10:30]
-    users_c = User.objects[20:40]
-    users = list(users_a) + list(users_b) + list(users_c)
-
-    errors = ErrorMaterial().generate_error_data(users)
-
-    for er in errors:
-        new_error = ErrorData(**er)
-        new_error.save()
-    
-    merge_failed_request(None)
-    
-    click.echo('Error data added')
+@click.argument('amount', required=False)
+def forgeerror(amount):
+    if error_forger(amount):
+        click.echo('Error data added')
+    else:
+        click.echo('Add error data failed')
