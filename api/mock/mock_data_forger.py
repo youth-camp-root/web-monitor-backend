@@ -9,11 +9,31 @@ Copyright © 2022 team Root of ByteDance Youth Camp. All rights reserved.
 
 from flask import Blueprint
 import click
+import sys
+
 from api.model.models import User, RequestData, ErrorData
 from api.mock.data_generator import UserMaterial, RequestMaterial, ErrorMaterial
 from api.util.data_process import merge_failed_request
 
 cmd = Blueprint('cmd', __name__)
+
+
+def str_to_class(classname):
+    """Convert string variable to class object"""
+    return getattr(sys.modules[__name__], classname)
+
+
+def delete_collection(collection_name):
+    if collection_name == 'all':
+        for collection in ['User', 'RequestData', 'ErrorData']:
+            str_to_class(collection).drop_collection()
+        return 'Collection "user", "requestData", "errorData" dropped'
+    else:
+        try:
+            str_to_class(collection_name).drop_collection()
+            return 'Collection {} dropped'.format(collection_name)
+        except AttributeError:
+            return 'Collection {} not exists'.format(collection_name)
 
 
 def user_forger(amount):
@@ -124,6 +144,7 @@ def error_forger(amount):
 @cmd.cli.command()
 @click.argument('amount', required=False)
 def forgeuser(amount):
+    """default amount is 50"""
     if user_forger(amount):
         click.echo('Users data added')
     else:
@@ -133,6 +154,7 @@ def forgeuser(amount):
 @cmd.cli.command()
 @click.argument('amount', required=False)
 def forgerequest(amount):
+    """default amount is 30% of user amount"""
     if request_forger(amount):
         click.echo('Request data added')
     else:
@@ -142,7 +164,16 @@ def forgerequest(amount):
 @cmd.cli.command()
 @click.argument('amount', required=False)
 def forgeerror(amount):
+    """default amount is 70% of user amount"""
     if error_forger(amount):
         click.echo('Error data added')
     else:
         click.echo('Add error data failed')
+
+
+@cmd.cli.command()
+@click.argument('collection_name')
+def drop(collection_name):
+    """Drop the specified collection"""
+    msg = delete_collection(collection_name)
+    click.echo(msg)
