@@ -10,7 +10,7 @@ from api.model.models import *
 from api.route.user import api as user_api
 from api.route.mock_api import api as mock_api
 from api.route.performance import api as performance_api
-from ..util.data_process import get_errors_overview, get_error_detail_overview
+from ..util.data_process import get_errors_overview, get_error_detail_overview, get_past_days
 
 api = Blueprint('api', __name__, url_prefix='/api')
 api.register_blueprint(user_api)
@@ -57,9 +57,11 @@ def getErrorInfo():
 
         error_details = get_error_detail_overview(errorIssue['errorType'], errorIssue['originURL'])
 
-        error_info = errorIssue
-
-        error_info.update(error_details)
+        error_info = {
+            'name': errorIssue['errorType'],
+            'info': errorIssue,
+            'details': error_details
+        }
 
         return successResponseWrap(error_info)
 
@@ -73,7 +75,9 @@ def getErrorInfo():
 @api.route('/error/issues/error-overview', methods=['GET'])
 def error_overview():
     data = get_errors_overview()
-    return successResponseWrap(data)
+    date_list = get_past_days(30)
+
+    return successResponseWrap({'dateList': date_list, 'data': data})
 
 
 @api.route('/error/issues/list', methods=['GET'])
@@ -81,12 +85,18 @@ def error_list():
 
     error_issue_list = []
 
+    date_list = get_past_days(30)
     errors = ErrorData.objects
+    errors_count = ErrorData.objects.count()
 
     for error in errors:
         error_details = get_error_detail_overview(error['errorType'], error['originURL'])
-        error_info = error
-        error_info.update(error_details)
+        error_info = {
+            'name': error['errorType'],
+            'info': error,
+            'details': error_details
+        }
         error_issue_list.append(error_info)
 
-    return successResponseWrap(error_issue_list)
+    return successResponseWrap({'list': error_issue_list, 'dateList': date_list, 'total': errors_count})
+
