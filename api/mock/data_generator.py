@@ -71,7 +71,7 @@ class PageLoadMaterial():
             {
                 'user': random.choice(users),
                 'pageUrl': fake.url(),
-                'timestamp': fake.date_time_between_dates(datetime_start=datetime(2022, 7, 15), datetime_end=datetime(2022, 8, 18)),
+                'timestamp': fake.date_time_between_dates(datetime_start=datetime(2022, 8, 1), datetime_end=datetime.utcnow()),
                 'FP': random.uniform(10, 1024),
                 'FCP': random.uniform(10, 1024),
                 'DOMReady': random.uniform(10, 1024),
@@ -85,7 +85,7 @@ class RequestMaterial():
     targetURL = [fake.uri() for _ in range(20)]
     statusCode = ['404', '401', '502', '200', '201', '202', '307']
     timestamp = [fake.date_time_between_dates(datetime_start=datetime(
-        2022, 7, 15), datetime_end=datetime(2022, 8, 18)) for _ in range(30)]
+        2022, 8, 1), datetime_end=datetime.utcnow()) for _ in range(30)]
     eventType = ['load']
     httpDuration = [random.uniform(1024, 8192) for _ in range(1024)]
     dnsDuration = [random.uniform(16, 1024) for _ in range(1024)]
@@ -141,7 +141,7 @@ class ErrorMaterial():
     category = ['JS', 'Promise', 'Resource', 'BlankScreen']
     originURL = [fake.uri() for _ in range(20)]
     timestamp = [fake.date_time_between_dates(datetime_start=datetime(
-        2022, 7, 15), datetime_end=datetime(2022, 8, 18)) for _ in range(30)]
+        2022, 8, 1), datetime_end=datetime.utcnow()) for _ in range(30)]
     errorMsg = {
         'jsErrorMsg': [
             'Uncaught SyntaxError: Invalid or unexpected token',
