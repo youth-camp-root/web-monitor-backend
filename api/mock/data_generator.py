@@ -87,8 +87,8 @@ class RequestMaterial():
     timestamp = [fake.date_between_dates(date_start=datetime(
         2022, 7, 15), date_end=datetime(2022, 8, 18)) for _ in range(30)]
     eventType = ['load']
-    httpDuration = [str(random.randint(1, 20)) for _ in range(10)]
-    dnsDuration = [str(random.randint(1, 20)) for _ in range(10)]
+    httpDuration = [random.uniform(1024, 8192) for _ in range(1024)]
+    dnsDuration = [random.uniform(16, 1024) for _ in range(1024)]
     params = 'name=test'
     responseData = {
         'error': '{"error"}',
