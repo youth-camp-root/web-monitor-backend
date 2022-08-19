@@ -3,7 +3,8 @@ from bson import ObjectId
 
 from api.util.utils import failResponseWrap, successResponseWrap
 from api.model.models import *
-from ..util.data_process import get_errors_overview, get_error_detail_overview, get_past_days
+from ..util.data_process import get_errors_overview, get_error_detail_overview
+from ..util.utils import get_past_days
 
 api = Blueprint('errors', __name__, url_prefix='/error')
 
@@ -87,27 +88,44 @@ def error_overview():
     tags:
         - Errors
     """
-    data = get_errors_overview()
     date_list = get_past_days(30)
+    data = get_errors_overview(date_list)
 
     return successResponseWrap({'dateList': date_list, 'data': data})
 
 
 @api.route('/issues/list', methods=['GET'])
 def error_list():
-    """返回所有Errors信息并包含过去14天的统计信息
+    """返回所有Errors信息并包含过去14天的统计信息(分页query可选)
     ---
     tags:
         - Errors
+    parameters:
+        - name: page
+          in: query
+          type: string
+          required: false
+        - name: items
+          in: query
+          type: string
+          required: false
     """
-    error_issue_list = []
+    page_nb = request.args.get('page')
+    items_per_page = request.args.get('items')
 
-    date_list = get_past_days(30)
-    errors = ErrorData.objects
+    error_issue_list = []
+    date_list = get_past_days(14)
+
+    if page_nb != None and items_per_page != None:
+        offset = (int(page_nb)-1) * int(items_per_page)
+        errors = ErrorData.objects.skip(offset).limit(int(items_per_page))
+    else:
+        errors = ErrorData.objects
+
     errors_count = ErrorData.objects.count()
 
     for error in errors:
-        error_details = get_error_detail_overview(error['errorType'], error['originURL'])
+        error_details = get_error_detail_overview(error['errorType'], error['originURL'], date_list)
         error_info = {
             'name': error['errorType'],
             'info': error,

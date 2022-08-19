@@ -8,7 +8,6 @@ Copyright © 2022 team Root of ByteDance Youth Camp. All rights reserved.
 """
 
 from ..model.models import User, RequestData, ErrorData
-from .utils import get_past_days
 
 
 def merge_failed_request(origin_url):
@@ -29,17 +28,15 @@ def merge_failed_request(origin_url):
             new_error.save()
 
 
-def get_errors_overview():
+def get_errors_overview(date_range):
     """Summarize error issues
     """
     error_overview_list = []
 
-    past_days = get_past_days(30)
-
     error_all_overview = {
         'name': 'Total Error',
         'count': ErrorData.objects.count(),
-        'value': [ErrorData.objects(timestamp=date).count() for date in past_days]
+        'value': [ErrorData.objects().filter(timestamp__gte=day + ' 00:00:00', timestamp__lte=day + ' 23:59:59').count() for day in date_range]
     }
 
     error_overview_list.append(error_all_overview)
@@ -49,31 +46,29 @@ def get_errors_overview():
         if item == 'JS':
             error_type_overview['name'] = 'JS Error'
             error_type_overview['count'] = ErrorData.objects(category='JS').count() + ErrorData.objects(category='Promise').count()
-            error_type_overview['value'] = [ErrorData.objects(category='JS', timestamp=date).count() + ErrorData.objects(category='Promise', timestamp=date).count() for date in past_days]
+            error_type_overview['value'] = [ErrorData.objects(category='JS').filter(timestamp__gte=day + ' 00:00:00', timestamp__lte=day + ' 23:59:59').count() + ErrorData.objects(category='Promise').filter(timestamp__gte=day + ' 00:00:00', timestamp__lte=day + ' 23:59:59').count() for day in date_range]
         elif item == 'Request':
             error_type_overview['name'] = 'API Error'
             error_type_overview['count'] = ErrorData.objects(category='Request').count()
-            error_type_overview['value'] = [ErrorData.objects(category='Request', timestamp=date).count() for date in past_days]
+            error_type_overview['value'] = [ErrorData.objects(category='Request').filter(timestamp__gte=day + ' 00:00:00', timestamp__lte=day + ' 23:59:59').count() for day in date_range]
         elif item == 'Resource':
             error_type_overview['name'] = 'Resource Error'
             error_type_overview['count'] = ErrorData.objects(category='Resource').count()
-            error_type_overview['value'] = [ErrorData.objects(category='Resource', timestamp=date).count() for date in past_days]
+            error_type_overview['value'] = [ErrorData.objects(category='Resource').filter(timestamp__gte=day + ' 00:00:00', timestamp__lte=day + ' 23:59:59').count() for day in date_range]
         elif item == 'BlankScreen':
             error_type_overview['name'] = 'BlankScreen Error'
             error_type_overview['count'] = ErrorData.objects(category='BlankScreen').count()
-            error_type_overview['value'] = [ErrorData.objects(category='BlankScreen', timestamp=date).count() for date in past_days]
+            error_type_overview['value'] = [ErrorData.objects(category='BlankScreen').filter(timestamp__gte=day + ' 00:00:00', timestamp__lte=day + ' 23:59:59').count() for day in date_range]
         error_overview_list.append(error_type_overview)
 
     return error_overview_list
 
 
-def get_error_detail_overview(error_type, origin_url):
+def get_error_detail_overview(error_type, origin_url, date_range):
     """Count total, affected users and occurances of an error within last 14 days
     """
 
-    past_days = get_past_days(14)
-
-    error_freq = [ErrorData.objects(errorType=error_type, originURL=origin_url, timestamp=date).count() for date in past_days]
+    error_freq = [ErrorData.objects(errorType=error_type, originURL=origin_url).filter(timestamp__gte=day + ' 00:00:00', timestamp__lte=day + ' 23:59:59').count() for day in date_range]
 
     total_error_cnt = ErrorData.objects(errorType=error_type, originURL=origin_url).count()
 
