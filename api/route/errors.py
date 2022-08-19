@@ -62,7 +62,7 @@ def getErrorInfo(errorID):
     
     try:
         errorIssue = ErrorData.objects(_id=ObjectId(errorID)).first()
-        related_user = User.objects(_id=ObjectId(errorIssue['user']['$oid']))
+        related_user = User.objects(_id=ObjectId(errorIssue['user']))
 
         if not errorIssue:
             return failResponseWrap(msg='Error not found')
