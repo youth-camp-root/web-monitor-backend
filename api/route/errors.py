@@ -66,7 +66,9 @@ def getErrorInfo(errorID):
         if not errorIssue:
             return failResponseWrap(msg='Error not found')
 
-        error_details = get_error_detail_overview(errorIssue['errorType'], errorIssue['originURL'])
+        date_list = get_past_days(14)
+
+        error_details = get_error_detail_overview(errorIssue['errorType'], errorIssue['originURL'], date_list)
 
         error_info = {
             'name': errorIssue['errorType'],
