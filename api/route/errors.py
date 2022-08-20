@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, abort
 from bson import ObjectId
+import json
 
 from api.util.utils import failResponseWrap, successResponseWrap
 from api.model.models import *
@@ -62,10 +63,11 @@ def getErrorInfo(errorID):
     
     try:
         errorIssue = ErrorData.objects(_id=ObjectId(errorID)).first()
-        related_user = User.objects(_id=ObjectId(errorIssue['user']))
 
         if not errorIssue:
             return failResponseWrap(msg='Error not found')
+
+        user_info = {'user': json.loads(errorIssue['user'].to_json())}
 
         date_list = get_past_days(14)
 
@@ -75,7 +77,7 @@ def getErrorInfo(errorID):
             'name': errorIssue['errorType'],
             'info': errorIssue,
             'details': error_details,
-            'user': related_user
+            'user': user_info
         }
 
         return successResponseWrap(error_info)
