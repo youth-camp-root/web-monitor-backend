@@ -53,7 +53,7 @@ def get_user_info_all():
     page_nb = request.args.get('current')
     offset = (int(page_nb) - 1) * int(items_per_page)
     try:
-        list = User.objects.skip(int(offset)).limit(int(items_per_page))
+        list = User.objects.order_by('_id').skip(int(offset)).limit(int(items_per_page))
         total = int(int(User.objects.count()) / int(items_per_page))
         return successResponseWrap({'list': list, 'total': total})
 
