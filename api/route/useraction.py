@@ -33,31 +33,22 @@ def login():
     return failResponseWrap(msg='Internal Error')
 
 
-@api.route('/', methods=['GET'])
-def get_users():
-    """列出所有用户
-    ---
-    tags:
-        - 用户
-    description:
-        用户列表
-    """
-    users = User.objects
-    return successResponseWrap(users)
-
 # http://127.0.0.1:5000/api/useraction/all?current=1&pageSize=10
-
-
 @api.route('/all', methods=['GET'])
 def get_user_info_all():
     """查询所有用户
     ---
     tags:
-        - 用户
+        - 用户细查
     parameters:
-        - current: number;
-          pageSize: number;
-          required: true;
+        - name: current
+          in: query
+          type: integer
+          description: 当前页
+        - name: pageSize
+          in: query
+          type: integer
+          description: 每页数量
     """
     items_per_page = request.args.get('pageSize')
     page_nb = request.args.get('current')
@@ -79,12 +70,20 @@ def get_user_info_one():
     """查询某个特定用户
     ---
     tags:
-        - 用户
+        - 用户细查
     parameters:
-        - id: string;
-          current: number;
-          pageSize: number;
-          required: true;
+        - name: current
+          in: query
+          type: integer
+          description: 当前页
+        - name: pageSize
+          in: query
+          type: integer
+          description: 每页数量
+        - name: id
+          in: query
+          type: string
+          description: 用户id
     """
     id = request.args.get('id')
     items_per_page = request.args.get('pageSize')

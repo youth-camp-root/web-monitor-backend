@@ -18,7 +18,6 @@ def get_overview_pv():
     ---
     tags:
         - Request
-    parameters:
     """
 
     try:
@@ -38,7 +37,6 @@ def get_overview_uv():
     ---
     tags:
         - Request
-    parameters:
     """
 
     try:
@@ -58,7 +56,6 @@ def get_overview_useraction():
     ---
     tags:
         - Request
-    parameters:
     """
 
     try:
@@ -103,7 +100,6 @@ def get_overview_uvamount():
     ---
     tags:
         - Request
-    parameters:
     """
     try:
         # past_days = get_past_days(7)
@@ -147,7 +143,6 @@ def get_overview_pvamount():
     ---
     tags:
         - Request
-    parameters:
     """
     try:
         # past_days = get_past_days(7)
@@ -187,7 +182,6 @@ def get_overview_stayduration():
     ---
     tags:
         - Request
-    parameters:
     """
     try:
         past_days = get_past_days(7)
