@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, abort
 from bson import ObjectId
-import random
+from ua_parser import user_agent_parser
 from api.util.utils import failResponseWrap, successResponseWrap
 from api.model.models import *
 import json
@@ -17,15 +17,14 @@ class JSONEncoder(json.JSONEncoder):
 @api.route('/login', methods=['GET'])
 def login():
     try:
-        ip = request.remote_addr
-        os = request.args.get('os')
-        browser = request.args.get('browser')
-        device = request.args.get('device')
-        print(os)
-        print(device)
-        print(browser)
+        r = user_agent_parser.Parse(request.headers['User-Agent'])
+        ip = request.headers['X-Real-Ip']
+        os = r['os']['family'] + r['os']['major']
+        browser = r['user_agent']['family'] + r['os']['major']
+        device = r['device']['family']
+        page = request.args.get('page', '')
         newuser = User(ip=ip, os=os, browser=browser,
-                       device=device, page='', tag='TagB')
+                       device=device, page=page, tag='TagB')
         newuser.save()
         return successResponseWrap(JSONEncoder().encode(newuser.id))
     except Exception as e:

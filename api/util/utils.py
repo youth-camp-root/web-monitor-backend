@@ -43,8 +43,7 @@ def failResponseWrap(msg, data=None, code=50000):
     })
 
 
-def get_past_days(days):
-    now = datetime.now()
+def get_past_days(days, now=datetime.now()):
     return [
         (
             datetime(year=now.year, month=now.month, day=now.day) -
