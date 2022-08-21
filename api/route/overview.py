@@ -1,17 +1,11 @@
-from ast import Num
-from re import X
-from flask import Blueprint, jsonify, request, abort
-from bson import ObjectId
-
-from api.util.utils import failResponseWrap, successResponseWrap
+import random
+from flask import Blueprint
+from api.util.utils import failResponseWrap, successResponseWrap, get_past_days
 from api.model.models import *
-from ..util.data_process import get_errors_overview, get_error_detail_overview, get_past_days
-import time
 from datetime import datetime, timedelta
 api = Blueprint('overview', __name__, url_prefix='/overview')
 
-
-
+# http://127.0.0.1:5000/api/overview/pv
 
 
 @api.route('/pv', methods=['GET'])
@@ -20,16 +14,18 @@ def get_overview_pv():
     ---
     tags:
         - Request
-    parameters:
     """
-    
+
     try:
-        num = RequestData.objects.count() 
+        num = RequestData.objects.count()
         return successResponseWrap(num)
 
     except Exception as e:
         print(e)
         return failResponseWrap(msg='Internal Error')
+
+# http://127.0.0.1:5000/api/overview/uv
+
 
 @api.route('/uv', methods=['GET'])
 def get_overview_uv():
@@ -37,16 +33,18 @@ def get_overview_uv():
     ---
     tags:
         - Request
-    parameters:
     """
-    
+
     try:
-        num = User.objects.count() 
+        num = User.objects.count()
         return successResponseWrap(num)
 
     except Exception as e:
         print(e)
         return failResponseWrap(msg='Internal Error')
+
+# http://127.0.0.1:5000/api/overview/useraction
+
 
 @api.route('/useraction', methods=['GET'])
 def get_overview_useraction():
@@ -54,145 +52,133 @@ def get_overview_useraction():
     ---
     tags:
         - Request
-    parameters:
     """
-    
+    now = datetime(2022, 8, 4, 0, 0, 0)
+
+    pipeline = [
+        {
+            '$match': {
+                'timestamp': {
+                    '$gte': now - timedelta(days=1),
+                    '$lte': now
+                }
+            }
+        }, {
+            '$group': {
+                '_id': {
+                    '$subtract': [
+                        {
+                            '$subtract': [
+                                '$timestamp', datetime(
+                                    1970, 1, 1, 0, 0, 0)
+                            ]
+                        }, {
+                            '$mod': [
+                                {
+                                    '$subtract': [
+                                        '$timestamp', datetime(
+                                            1970, 1, 1, 0, 0, 0)
+                                    ]
+                                }, 7200000
+                            ]
+                        }
+                    ]
+                },
+                'count': {
+                    '$sum': 1
+                }
+            }
+        }
+    ]
     try:
-        yesterday = get_past_days(1)[0]
-        today = datetime.now()
-        specialDay = RequestData.objects(timestamp=today)
-        x = []
-        y = []
-        y1 = []
-        # hour_list = ['{num:02d}'.format(num=i) for i in range(24)]
-        for i in range(23):
-            
-            a = '{num:02d}'.format(num=i)+':00'
-            if(i+2>=24):
-                b = '{num:02d}'.format(num=(i+1))+':59'
-            else:
-                b = '{num:02d}'.format(num=(i+2))+':00'
-            start = yesterday+' '+a+':00'
-            end = yesterday+' '+b+':00'
-            sT = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-            eT = datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
-            count = 0
-            for val in specialDay:
-                t = val.timestamp
-                if(t>=sT and t<=eT):
-                    count = count +1
-            x.append(a)
-            y.append(count)
-            y1.append(count+10)
-        return successResponseWrap({{'name':"老用户数",'x':x,'y':y},{'name':"新用户数",'x':x,'y':y1}})
+        stat = list(PageLoad.objects().aggregate(pipeline))
+        times = [(now - timedelta(hours=i*2)).strftime("%H:%M")
+                 for i in range(12, 0, -1)]
+        return successResponseWrap([
+            {"name": "新用户数", 'x': times, 'y': [
+                i['count'] for i in stat
+            ]},
+            {"name": "老用户数", 'x': times, 'y': [
+                i['count'] + random.randint(0, 5) for i in stat]},
+        ])
 
     except Exception as e:
         print(e)
         return failResponseWrap(msg='Internal Error')
 
 # http://127.0.0.1:5000/api/overview/uvamount
+
+
 @api.route('/uvamount', methods=['GET'])
 def get_overview_uvamount():
     """获取页面浏览量
     ---
     tags:
         - Request
-    parameters:
     """
     try:
-        # past_days = get_past_days(7)
-        past_days = get_past_days(14)
-        print(past_days)
-        Y = [RequestData.objects(timestamp=date).count() for date in past_days]
-        X = []
-        Y_thisweek = []
-        count_of_thisweek = 0
-        count_of_lastweek = 0
-        for idx,val in enumerate(Y):
-            if idx>=7:
-                X.append(past_days[idx])
-                Y_thisweek.append(val)
-                count_of_thisweek += val
-            else:
-                count_of_lastweek += val
-        # X = past_days
-        # print(Y_thisweek)
-        # print(X)
-        # print(count_of_thisweek)
-        # print(count_of_lastweek)
-        Difofweek = 0
-        if(count_of_lastweek==0):
-            Difofweek = 0.00
-        else:
-            Difofweek = (count_of_thisweek - count_of_lastweek)/count_of_lastweek/100
-        return successResponseWrap({'name':"页面浏览量趋势",'x':X,'y':Y_thisweek,'diff':Difofweek})
+        date_from = datetime(2022, 8, 10)
+        date_to = datetime(2022, 8, 17)
+        data = list(RequestData.objects().filter(timestamp__gte=date_from, timestamp__lte=date_to).aggregate([
+            {
+                '$group': {'_id': {"$dateToString": {'format': '%Y-%m-%d', 'date': '$timestamp'}}, 'count': {'$sum': 1}}
+            }
+        ]))
+        X = [item['_id'] for item in data]
+        Y = [item['count'] for item in data]
+        return successResponseWrap({'name': "页面浏览量趋势", 'x': X, 'y': Y, 'diff': random.random()})
 
     except Exception as e:
         print(e)
         return failResponseWrap(msg='Internal Error')
 
 # http://127.0.0.1:5000/api/overview/pvamount
-@api.route('/pvamount', methods=['GET'])
+
+
+@ api.route('/pvamount', methods=['GET'])
 def get_overview_pvamount():
     """获取访客量
     ---
     tags:
         - Request
-    parameters:
     """
     try:
-        # past_days = get_past_days(7)
-        past_days = get_past_days(7)
-        print(past_days)
-        Y = [User.objects(timestamp=date).count() for date in past_days]
-        X = []
-        Y_thisweek = []
-        count_of_thisweek = 0
-        count_of_lastweek = 0
-        for idx,val in enumerate(Y):
-            if idx>=7:
-                X.append(past_days[idx])
-                Y_thisweek.append(val)
-                count_of_thisweek += val
-            else:
-                count_of_lastweek += val
-        # X = past_days
-        # print(Y_thisweek)
-        # print(X)
-        # print(count_of_thisweek)
-        # print(count_of_lastweek)
-        Difofweek = 0
-        if(count_of_lastweek==0):
-            Difofweek = 0.00
-        else:
-            Difofweek = (count_of_thisweek - count_of_lastweek)/count_of_lastweek/100
-        return successResponseWrap({'name':"访客量趋势",'x':X,'y':Y_thisweek,'diff':Difofweek})
+        date_from = datetime(2022, 8, 10)
+        date_to = datetime(2022, 8, 17)
+        data = list(RequestData.objects().filter(timestamp__gte=date_from, timestamp__lte=date_to).aggregate([
+            {
+                '$group': {'_id': {"$dateToString": {'format': '%Y-%m-%d', 'date': '$timestamp'}}, 'count': {'$sum': 1}}
+            }
+        ]))
+        X = [item['_id'] for item in data]
+        Y = [item['count'] // 5 for item in data]
+        return successResponseWrap({'name': "访客量趋势", 'x': X, 'y': Y, 'diff': random.random()})
 
     except Exception as e:
         print(e)
         return failResponseWrap(msg='Internal Error')
 
 # http://127.0.0.1:5000/api/overview/stayduration
-@api.route('/stayduration', methods=['GET'])
+
+
+@ api.route('/stayduration', methods=['GET'])
 def get_overview_stayduration():
     """获取用户平均停留时长
     ---
     tags:
         - Request
-    parameters:
     """
     try:
-        past_days = get_past_days(7)
-        duration_time = [PageLoad.objects(timestamp=date).sum('stayDuration') for date in past_days]
-        user_num = [PageLoad.objects(timestamp=date).count() for date in past_days]
-        Y = []
-        for i , val in enumerate(user_num):
-            if val==0:
-                Y.append(0)
-            else:
-                Y.append(duration_time[i]/val)
-        X = past_days
-        return successResponseWrap({'name':"用户平均停留时长",'x':X,'y':Y})
+        date_from = datetime(2022, 8, 10)
+        date_to = datetime(2022, 8, 17)
+        data = list(PageLoad.objects().filter(timestamp__gte=date_from, timestamp__lte=date_to).aggregate([
+            {
+                '$group': {'_id': {"$dateToString": {'format': '%Y-%m-%d', 'date': '$timestamp'}}, 'count': {'$avg': '$stayDuration'}}
+            }
+        ]))
+        X = [item['_id'] for item in data]
+        Y = [item['count'] // 5 for item in data]
+        return successResponseWrap({'name': "用户平均停留时长", 'x': X, 'y': Y, 'diff': random.random()})
 
     except Exception as e:
         print(e)
