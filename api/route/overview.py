@@ -1,12 +1,7 @@
-from ast import Num
-from re import X
-from flask import Blueprint, jsonify, request, abort
-from bson import ObjectId
+from flask import Blueprint
 
 from api.util.utils import failResponseWrap, successResponseWrap, get_past_days
 from api.model.models import *
-import time
-import random
 from datetime import datetime, timedelta
 api = Blueprint('overview', __name__, url_prefix='/overview')
 
@@ -58,7 +53,43 @@ def get_overview_useraction():
     tags:
         - Request
     """
+    now = datetime(2022, 8, 4, 0, 0, 0)
 
+    pipeline = [
+        {
+            '$match': {
+                'timestamp': {
+                    '$gte': now - timedelta(days=1),
+                    '$lte': now
+                }
+            }
+        }, {
+            '$group': {
+                '_id': {
+                    '$subtract': [
+                        {
+                            '$subtract': [
+                                '$timestamp', datetime(
+                                    1970, 1, 1, 0, 0, 0)
+                            ]
+                        }, {
+                            '$mod': [
+                                {
+                                    '$subtract': [
+                                        '$timestamp', datetime(
+                                            1970, 1, 1, 0, 0, 0)
+                                    ]
+                                }, 7200000
+                            ]
+                        }
+                    ]
+                },
+                'count': {
+                    '$sum': 1
+                }
+            }
+        }
+    ]
     try:
         yesterday = get_past_days(1)[0]
         today = datetime.now()
@@ -85,8 +116,8 @@ def get_overview_useraction():
                     count = count + 1
             x.append(a)
             y.append(count)
-            y1.append(count+random.randint(0,20))
-        return successResponseWrap([{'name': "老用户数", 'x': x, 'y': y}, {'name': "新用户数", 'x': x, 'y': y1}])
+            y1.append(count+10)
+        return successResponseWrap({{'name': "老用户数", 'x': x, 'y': y}, {'name': "新用户数", 'x': x, 'y': y1}})
 
     except Exception as e:
         print(e)

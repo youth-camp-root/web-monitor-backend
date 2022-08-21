@@ -17,11 +17,13 @@ def convert_utc_to_local(utc_datetime):
     """
     if utc_datetime:
         now_timestamp = time.time()
-        offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(now_timestamp)
+        offset = datetime.fromtimestamp(
+            now_timestamp) - datetime.utcfromtimestamp(now_timestamp)
         local_time = utc_datetime + offset
         return local_time.strftime('%Y-%m-%d %H:%M:%S')
     else:
         return None
+
 
 def successResponseWrap(data):
     return jsonify({
@@ -42,10 +44,11 @@ def failResponseWrap(msg, data=None, code=50000):
 
 
 def get_past_days(days):
-    date_list = []
-    for i in range(days, 0, -1):
-        day = datetime.now() - timedelta(days=i)
-        the_date = datetime(day.year, day.month, day.day).strftime('%Y-%m-%d')
-        date_list.append(the_date)
-        
-    return date_list
+    now = datetime.now()
+    return [
+        (
+            datetime(year=now.year, month=now.month, day=now.day) -
+            timedelta(days=i)
+        ).strftime('%Y-%m-%d')
+        for i in range(days, 0, -1)
+    ]
