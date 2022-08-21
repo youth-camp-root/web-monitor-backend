@@ -6,6 +6,7 @@ from bson import ObjectId
 from api.util.utils import failResponseWrap, successResponseWrap, get_past_days
 from api.model.models import *
 import time
+import random
 from datetime import datetime, timedelta
 api = Blueprint('overview', __name__, url_prefix='/overview')
 
@@ -84,8 +85,8 @@ def get_overview_useraction():
                     count = count + 1
             x.append(a)
             y.append(count)
-            y1.append(count+10)
-        return successResponseWrap({{'name': "老用户数", 'x': x, 'y': y}, {'name': "新用户数", 'x': x, 'y': y1}})
+            y1.append(count+random.randint(0,20))
+        return successResponseWrap([{'name': "老用户数", 'x': x, 'y': y}, {'name': "新用户数", 'x': x, 'y': y1}])
 
     except Exception as e:
         print(e)
